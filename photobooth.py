@@ -32,6 +32,9 @@ out = expanduser('~/Desktop/sxsw')
 # The watermark to apply to all images
 watermark_img = expanduser('~/Desktop/fedora.png')
 
+# Whether or not to watermark the photo
+wm = True
+
 # This assumes ssh-agent is running so we can do password-less scp
 ssh_image_repo = 'fedorapeople.org:~/public_html/sxsw/'
 
@@ -89,17 +92,21 @@ class PhotoBooth(object):
         print "Done!"
 
     def watermark(self, image):
-        """ Apply a watermark to an image """
-        mark = Image.open(watermark_img)
-        im = Image.open(image)
-        if im.mode != 'RGBA':
-            im = im.convert('RGBA')
-        layer = Image.new('RGBA', im.size, (0,0,0,0))
-        position = (im.size[0] - mark.size[0], im.size[1] - mark.size[1])
-        layer.paste(mark, position)
-        outfile = join(out, basename(image))
-        Image.composite(layer, im, layer).save(outfile)
-        return outfile
+        if wm:
+            """ Apply a watermark to an image """
+            mark = Image.open(watermark_img)
+            im = Image.open(image)
+            if im.mode != 'RGBA':
+                im = im.convert('RGBA')
+            layer = Image.new('RGBA', im.size, (0,0,0,0))
+            position = (im.size[0] - mark.size[0], im.size[1] - mark.size[1])
+            layer.paste(mark, position)
+            outfile = join(out, basename(image))
+            Image.composite(layer, im, layer).save(outfile)
+            return outfile
+        else:
+            outfile = join(out, basename(image))
+            return outfile
 
     def upload(self, image):
         """ Upload this image to a remote server """
